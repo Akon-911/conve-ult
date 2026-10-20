@@ -1,0 +1,20 @@
+# Build / Compiler output
+target/
+*.class
+
+# IDE and Editors
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
