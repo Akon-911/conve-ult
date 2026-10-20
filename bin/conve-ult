@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -e
+
+# Resolve base directory (handling symlinks)
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+BASE_DIR="$( cd -P "$BIN_DIR/.." && pwd )"
+
+# Auto-build if target/conve-ult.jar does not exist
+if [ ! -f "$BASE_DIR/target/conve-ult.jar" ]; then
+    "$BASE_DIR/build.sh" > /dev/null
+fi
+
+# Build classpath
+CP="$BASE_DIR/target/conve-ult.jar"
+for jar in "$BASE_DIR"/lib/*.jar; do
+    if [ -f "$jar" ]; then
+        CP="$CP:$jar"
+    fi
+done
+
+# Run Java application
+exec java \
+    -Dlog4j2.statusLoggerLevel=OFF \
+    -Dorg.apache.logging.log4j.simplelog.StatusLogger.level=OFF \
+    -cp "$CP" \
+    com.conveult.ConveUltMain "$@"
