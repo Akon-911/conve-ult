@@ -94,6 +94,18 @@
             <artifactId>commons-compress</artifactId>
             <version>1.25.0</version>
         </dependency>
+
+        <!-- OpenJFX for Modern Dark-Mode GUI -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>21.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>21.0.6</version>
+        </dependency>
     </dependencies>
 
     <build>

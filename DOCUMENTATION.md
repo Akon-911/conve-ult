@@ -11,6 +11,7 @@
    - [3.3 Image Processing Engine (`ImageEngine.java`)](#33-image-processing-engine-imageenginejava)
    - [3.4 Document Processing Engine (`DocumentEngine.java`)](#34-document-processing-engine-documentenginejava)
    - [3.5 CLI Application Controller (`ConveUlt.java`)](#35-cli-application-controller-conveultjava)
+   - [3.6 JavaFX GUI Desktop Application (`ConveUltApp.java` & `DarkTheme.java`)](#36-javafx-gui-desktop-application)
 4. [Deep Dives into Underlying Technologies](#4-deep-dives-into-underlying-technologies)
    - [Apache PDFBox 3.0.1](#apache-pdfbox-301)
    - [Apache POI 5.2.5 (OOXML & Scratchpad)](#apache-poi-525-ooxml--scratchpad)
@@ -72,18 +73,25 @@ conve-ult/
 │   └── conve-ult               # Executable shell launcher (auto-builds & sets classpath)
 ├── conve-ult                   # Symlink to bin/conve-ult for local invocation
 ├── lib/                        # Pre-bundled runtime JARs (POI, PDFBox, TwelveMonkeys)
+├── javafx-sdk/                 # OpenJFX 21 LTS runtime (auto-bootstrapped if missing)
 ├── pom.xml                     # Maven build configuration
 ├── build.sh                    # Independent compiler script using standard javac & jar
 ├── README.md                   # User guide & command reference
 ├── DOCUMENTATION.md            # Detailed code and architectural documentation
 ├── test_samples/               # Example test assets (sample.png, sample.md)
+├── src/main/resources/
+│   └── com/conveult/gui/
+│       └── dark-theme.css      # Dark mode stylesheet (slate/indigo palette)
 └── src/main/java/com/conveult/
+    ├── ConveUltMain.java       # Universal entry point: dispatches to GUI or CLI
     ├── ConveUlt.java           # CLI entry point, flag parser & terminal UI
-    ├── ConveUltMain.java       # Backward-compatible entry forwarding to ConveUlt
     ├── Format.java             # Format registry (MIME types, extensions, category)
     ├── DocumentModel.java      # Intermediate document AST (Doc, Block, Run, Cell, Item)
     ├── ImageEngine.java        # All image processing (resize, quality, rotate, PDF<->IMG)
-    └── DocumentEngine.java     # Complete document parsing & rendering matrix
+    ├── DocumentEngine.java     # Complete document parsing & rendering matrix
+    └── gui/
+        ├── ConveUltApp.java    # JavaFX desktop GUI application (Single & Batch modes)
+        └── DarkTheme.java      # Styling helpers, SVG vector icons & theme loader
 ```
 
 ### Why this structure?
@@ -230,6 +238,31 @@ File/PDF -> Load BufferedImage -> Transform (Resize, Aspect, Rotate, Flip, Gray)
 - **Command Routing:** Routes to `convert`, `batch`, `info`, `formats`, `help`, or `version`.
 - **Diagnostics & Feedback:** Measures execution time in milliseconds, calculates file size changes and compression savings percentage, and outputs formatted ANSI color messages.
 - **Log Suppression:** Programmatically disables noisy StatusLogger and font warnings from Apache PDFBox and Log4j so CLI output remains clean.
+
+---
+
+### 3.6 JavaFX GUI Desktop Application
+
+[`ConveUltApp.java`](file:///home/akon-s/Documents/Projects/vibecheck/src/main/java/com/conveult/gui/ConveUltApp.java) and [`DarkTheme.java`](file:///home/akon-s/Documents/Projects/vibecheck/src/main/java/com/conveult/gui/DarkTheme.java) provide the frontend interface for `conve-ult`:
+
+- **Universal Dispatcher (`ConveUltMain.java`):**
+  - When invoked with `gui`, `--gui`, or with no arguments inside a desktop environment (`$DISPLAY` or `$WAYLAND_DISPLAY`), launches the JavaFX GUI application.
+  - When invoked with file arguments or in headless environments, executes the CLI pipeline without initializing graphic toolkits.
+- **Dark Mode Design System:**
+  - Designed with an obsidian-slate palette (`#13141f` base, `#1a1c2b` surfaces, `#282c42` borders, and `#6366f1` indigo accents).
+  - High-DPI scalable SVG vector icons for upload, convert, check, info, trash, and folder actions.
+- **Drag-and-Drop Dropzone:**
+  - Implements JavaFX `Dragboard` event handlers (`DRAG_OVER`, `DRAG_ENTERED`, `DRAG_EXITED`, `DRAG_DROPPED`).
+  - Provides visual hover states and smooth transition to the file inspection card.
+- **Asynchronous Worker Threading:**
+  - Conversions are dispatched via `javafx.concurrent.Task` onto separate worker threads.
+  - The UI thread remains completely responsive; progress bars and status labels are updated via `Platform.runLater()`.
+- **Batch Processing Table:**
+  - Backed by an `ObservableList<BatchItem>` in a JavaFX `TableView`.
+  - Supports adding individual files or entire folders with automatic file filtering.
+  - Features real-time status tracking (`Queued` $\to$ `Processing...` $\to$ `✔ Done` or `✘ Failed`).
+- **Desktop Integration:**
+  - Direct links to launch the converted file with the user's default system application (`Desktop.getDesktop().open(file)`) or reveal the containing folder in the desktop file manager.
 
 ---
 

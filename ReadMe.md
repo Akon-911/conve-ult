@@ -5,28 +5,40 @@
 
 ## 📑 Contents
 1. [High-Level System Architecture](#1-high-level-system-architecture)
-2. [End-to-End Execution Flowchart](#2-end-to-end-execution-flowchart)
-3. [Command Routing & CLI Lifecycle](#3-command-routing--cli-lifecycle)
-4. [Image Pipeline Architecture & Transformation Flow](#4-image-pipeline-architecture--transformation-flow)
-5. [Document Pipeline & The $N \times M$ Intermediate Model](#5-document-pipeline--the-n--m-intermediate-model)
-6. [Component Interaction Sequence Diagram](#6-component-interaction-sequence-diagram)
-7. [Class & Object Structure Diagram](#7-class--object-structure-diagram)
-8. [Step-by-Step Code Execution Trace](#8-step-by-step-code-execution-trace)
-9. [Resilience, Fallbacks & Safety Mechanics](#9-resilience-fallbacks--safety-mechanics)
+2. [JavaFX Dark Mode GUI Frontend](#2-javafx-dark-mode-gui-frontend)
+3. [End-to-End Execution Flowchart](#3-end-to-end-execution-flowchart)
+4. [Command Routing & CLI Lifecycle](#4-command-routing--cli-lifecycle)
+5. [Image Pipeline Architecture & Transformation Flow](#5-image-pipeline-architecture--transformation-flow)
+6. [Document Pipeline & The $N \times M$ Intermediate Model](#6-document-pipeline--the-n--m-intermediate-model)
+7. [Component Interaction Sequence Diagram](#7-component-interaction-sequence-diagram)
+8. [Class & Object Structure Diagram](#8-class--object-structure-diagram)
+9. [Step-by-Step Code Execution Trace](#9-step-by-step-code-execution-trace)
+10. [Resilience, Fallbacks & Safety Mechanics](#10-resilience-fallbacks--safety-mechanics)
 
 ---
 
 ## 1. High-Level System Architecture
 
-`conve-ult` is designed around **zero external background daemons** and **high-cohesion modular engines**. The entire project is powered by 5 core Java source files:
+`conve-ult` is designed around **zero external background daemons** and **high-cohesion modular engines**, providing both a **modern Dark Mode JavaFX GUI** and a fast **CLI**.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                              ConveUlt.java                             │
-│       CLI Entry Point • Argument Parsing • Subcommands • Terminal UI   │
+│                              ConveUltMain                              │
+│              Universal Dispatcher (GUI or CLI based on args)           │
 └───────────────────┬────────────────────────────────┬───────────────────┘
                     │                                │
                     ▼                                ▼
+       ┌────────────────────────┐      ┌────────────────────────┐
+       │     ConveUltApp.java   │      │      ConveUlt.java     │
+       │   JavaFX Dark Mode GUI │      │   Headless CLI Engine  │
+       │  Drag & Drop • Batch   │      │ Terminal UI • Flags    │
+       └────────────┬───────────┘      └────────────┬───────────┘
+                    │                               │
+                    └───────────────┬───────────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    │                               │
+                    ▼                               ▼
        ┌─────────────────────────┐      ┌─────────────────────────┐
        │     ImageEngine.java    │      │   DocumentEngine.java   │
        │  Scaling • Compression  │      │  Parsing & Rendering    │
@@ -45,6 +57,34 @@
        │     Registry of Formats, Extensions, MIME & Kind        │
        └─────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 2. JavaFX Dark Mode GUI Frontend
+
+The frontend is a dedicated desktop application built with **OpenJFX 21 LTS** styled with a modern dark theme (`#13141f` slate/obsidian palette with indigo `#6366f1` accents).
+
+### Launching the GUI:
+```bash
+# Launch JavaFX GUI directly
+./conve-ult gui
+
+# Or simply run without flags in any desktop session:
+./conve-ult
+```
+
+### Key UI Features:
+- **Intuitive Drag & Drop**: Drop files anywhere on the dropzone or use the file chooser.
+- **Dynamic Format Filter**: Automatically populates compatible target formats based on the input type.
+- **Contextual Options**:
+  - *Images*: Real-time quality slider (10% - 100%), custom dimensions, keep aspect ratio toggle, rotation (90°/180°/270°), and grayscale filter.
+  - *Documents*: PDF page range selector, margin adjustments, and overwrite protection.
+- **Async Non-Blocking Threading**: All conversions run in background JavaFX `Task` worker threads, keeping the UI silky smooth with progress bars.
+- **Batch Processing Tab**: Convert entire folders or multiple selected files simultaneously with progress tracking.
+- **One-Click Post-Actions**: Directly open the converted file or view it in the system file manager upon completion.
+- **Built-in Format Catalog**: Full in-app reference for all supported document and image formats.
+
+---
 
 ---
 

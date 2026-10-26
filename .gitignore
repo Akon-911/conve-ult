@@ -2,6 +2,9 @@
 target/
 *.class
 
+# JavaFX SDK download
+javafx-sdk/
+
 # IDE and Editors
 .idea/
 *.iml

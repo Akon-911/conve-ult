@@ -4,11 +4,22 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-echo "=== Building conve-ult CLI ==="
+echo "=== Building conve-ult (CLI + JavaFX GUI) ==="
 
-# Build classpath from lib/*.jar
+# Auto-download JavaFX SDK if missing
+if [ ! -d "javafx-sdk/lib" ]; then
+    echo "JavaFX SDK not found in ./javafx-sdk. Fetching OpenJFX 21 LTS..."
+    mkdir -p /tmp/jfx_dl
+    curl -sL -o /tmp/jfx_dl/openjfx.zip https://download2.gluonhq.com/openjfx/21.0.6/openjfx-21.0.6_linux-x64_bin-sdk.zip
+    unzip -q /tmp/jfx_dl/openjfx.zip -d /tmp/jfx_dl
+    mv /tmp/jfx_dl/javafx-sdk-21.0.6 ./javafx-sdk
+    rm -rf /tmp/jfx_dl
+    echo "OpenJFX installed successfully into ./javafx-sdk"
+fi
+
+# Build classpath from lib/*.jar and javafx-sdk/lib/*.jar
 CP=""
-for jar in lib/*.jar; do
+for jar in lib/*.jar javafx-sdk/lib/*.jar; do
     if [ -f "$jar" ]; then
         if [ -z "$CP" ]; then
             CP="$jar"
@@ -20,6 +31,11 @@ done
 
 # Create target directories
 mkdir -p target/classes
+
+# Copy resources (stylesheets, icons) to target/classes
+if [ -d "src/main/resources" ]; then
+    cp -r src/main/resources/* target/classes/
+fi
 
 # Find all java source files
 SOURCES=$(find src/main/java -name "*.java")

@@ -24,9 +24,16 @@ for jar in "$BASE_DIR"/lib/*.jar; do
     fi
 done
 
+# JavaFX module path and options if present
+MODULE_OPTS=""
+if [ -d "$BASE_DIR/javafx-sdk/lib" ]; then
+    MODULE_OPTS="--module-path $BASE_DIR/javafx-sdk/lib --add-modules javafx.controls,javafx.graphics --enable-native-access=javafx.graphics --sun-misc-unsafe-memory-access=allow"
+fi
+
 # Run Java application
 exec java \
     -Dlog4j2.statusLoggerLevel=OFF \
     -Dorg.apache.logging.log4j.simplelog.StatusLogger.level=OFF \
+    $MODULE_OPTS \
     -cp "$CP" \
     com.conveult.ConveUltMain "$@"
