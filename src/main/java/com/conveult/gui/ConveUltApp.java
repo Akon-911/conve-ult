@@ -69,7 +69,6 @@ public class ConveUltApp extends Application {
     private ProgressBar progressBar;
     private Label statusLabel;
     private HBox successActionBox;
-    private Button openFileButton;
     private Button openFolderButton;
 
     // Batch Mode Controls
@@ -486,21 +485,16 @@ public class ConveUltApp extends Application {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // Success buttons
+        // Success action button (Open Folder)
         successActionBox = new HBox(8);
         successActionBox.setVisible(false);
 
-        openFileButton = new Button("Open File");
-        openFileButton.getStyleClass().add("button-success");
-        openFileButton.setGraphic(DarkTheme.createIcon(DarkTheme.ICON_EXTERNAL, "#ffffff", 0.8));
-        openFileButton.setOnAction(e -> openGeneratedFile());
-
         openFolderButton = new Button("Open Folder");
         openFolderButton.getStyleClass().add("button-secondary");
-        openFolderButton.setGraphic(DarkTheme.createIcon(DarkTheme.ICON_FOLDER, DarkTheme.COLOR_TEXT_PRIMARY, 0.8));
+        openFolderButton.setGraphic(DarkTheme.createIcon(DarkTheme.ICON_FOLDER, DarkTheme.COLOR_ACCENT, 0.9));
         openFolderButton.setOnAction(e -> openContainingFolder());
 
-        successActionBox.getChildren().addAll(openFileButton, openFolderButton);
+        successActionBox.getChildren().add(openFolderButton);
 
         actionRow.getChildren().addAll(convertButton, progressBar, statusLabel, spacer, successActionBox);
         card.getChildren().add(actionRow);
@@ -891,29 +885,49 @@ public class ConveUltApp extends Application {
         new Thread(conversionTask).start();
     }
 
-    private void openGeneratedFile() {
-        if (lastGeneratedFiles.isEmpty()) return;
-        File f = lastGeneratedFiles.get(0);
-        if (f.exists() && Desktop.isDesktopSupported()) {
-            try {
-                Desktop.getDesktop().open(f);
-            } catch (Exception ex) {
-                showError("Unable to open file: " + ex.getMessage());
-            }
-        }
-    }
-
     private void openContainingFolder() {
         if (lastGeneratedFiles.isEmpty()) return;
         File f = lastGeneratedFiles.get(0);
         File parent = f.getParentFile();
-        if (parent != null && parent.exists() && Desktop.isDesktopSupported()) {
-            try {
-                Desktop.getDesktop().open(parent);
-            } catch (Exception ex) {
-                showError("Unable to open folder: " + ex.getMessage());
+        if (parent == null || !parent.exists()) return;
+
+        // Run asynchronously in a background thread so the JavaFX UI never blocks or freezes
+        new Thread(() -> {
+            boolean opened = false;
+            String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
+
+            // 1. Native platform file manager launch (xdg-open on Linux)
+            if (os.contains("linux") || os.contains("nix")) {
+                try {
+                    new ProcessBuilder("xdg-open", parent.getAbsolutePath()).start();
+                    opened = true;
+                } catch (Exception ignored) {
+                    try {
+                        new ProcessBuilder("gio", "open", parent.getAbsolutePath()).start();
+                        opened = true;
+                    } catch (Exception ignored2) {}
+                }
+            } else if (os.contains("mac")) {
+                try {
+                    new ProcessBuilder("open", parent.getAbsolutePath()).start();
+                    opened = true;
+                } catch (Exception ignored) {}
+            } else if (os.contains("win")) {
+                try {
+                    new ProcessBuilder("explorer.exe", parent.getAbsolutePath()).start();
+                    opened = true;
+                } catch (Exception ignored) {}
             }
-        }
+
+            // 2. Safe fallback to AWT Desktop if native process was not dispatched
+            if (!opened && Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
+                try {
+                    Desktop.getDesktop().open(parent);
+                } catch (Exception ex) {
+                    Platform.runLater(() -> showError("Unable to open folder: " + ex.getMessage()));
+                }
+            }
+        }, "conve-ult-open-folder").start();
     }
 
     // =========================================================================
