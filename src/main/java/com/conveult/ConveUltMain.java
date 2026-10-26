@@ -9,12 +9,25 @@ import com.conveult.gui.ConveUltApp;
  */
 public class ConveUltMain {
 
+    static {
+        System.setProperty("log4j2.statusLoggerLevel", "OFF");
+        System.setProperty("org.apache.logging.log4j.simplelog.StatusLogger.level", "OFF");
+        try {
+            java.util.logging.Logger.getLogger("org.apache.pdfbox").setLevel(java.util.logging.Level.OFF);
+            java.util.logging.Logger.getLogger("org.apache.fontbox").setLevel(java.util.logging.Level.OFF);
+            java.util.logging.Logger.getLogger("org.apache").setLevel(java.util.logging.Level.OFF);
+        } catch (Throwable ignored) {}
+    }
+
     public static void main(String[] args) {
         boolean hasExplicitGuiFlag = args != null && args.length > 0 &&
                 (args[0].equalsIgnoreCase("gui") || args[0].equalsIgnoreCase("--gui"));
 
         boolean noArgs = args == null || args.length == 0;
-        boolean hasDisplay = System.getenv("DISPLAY") != null || System.getenv("WAYLAND_DISPLAY") != null;
+        String os = System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT);
+        boolean isWindows = os.contains("win");
+        boolean isMac = os.contains("mac");
+        boolean hasDisplay = isWindows || isMac || (System.getenv("DISPLAY") != null || System.getenv("WAYLAND_DISPLAY") != null);
 
         // Launch GUI if explicitly asked or launched with no arguments in a desktop session
         if (hasExplicitGuiFlag || (noArgs && hasDisplay)) {

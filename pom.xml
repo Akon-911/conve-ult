@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>conve-ult</name>
-    <description>Universal CLI File Converter powered by Java, Apache POI, and Apache PDFBox</description>
+    <description>Universal CLI and GUI File Converter powered by Java, Apache POI, Apache PDFBox, and OpenJFX</description>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -19,7 +19,48 @@
         <poi.version>5.2.5</poi.version>
         <pdfbox.version>3.0.1</pdfbox.version>
         <twelvemonkeys.version>3.10.1</twelvemonkeys.version>
+        <javafx.version>21.0.6</javafx.version>
+        <javafx.platform>linux</javafx.platform>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>linux</id>
+            <activation>
+                <os><family>unix</family><name>Linux</name></os>
+            </activation>
+            <properties>
+                <javafx.platform>linux</javafx.platform>
+            </properties>
+        </profile>
+        <profile>
+            <id>mac-x86_64</id>
+            <activation>
+                <os><family>mac</family><arch>x86_64</arch></os>
+            </activation>
+            <properties>
+                <javafx.platform>mac</javafx.platform>
+            </properties>
+        </profile>
+        <profile>
+            <id>mac-aarch64</id>
+            <activation>
+                <os><family>mac</family><arch>aarch64</arch></os>
+            </activation>
+            <properties>
+                <javafx.platform>mac-aarch64</javafx.platform>
+            </properties>
+        </profile>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os><family>windows</family></os>
+            </activation>
+            <properties>
+                <javafx.platform>win</javafx.platform>
+            </properties>
+        </profile>
+    </profiles>
 
     <dependencies>
         <!-- Apache POI for Microsoft Documents (.docx, .doc, .xlsx, etc.) -->
@@ -95,16 +136,28 @@
             <version>1.25.0</version>
         </dependency>
 
-        <!-- OpenJFX for Modern Dark-Mode GUI -->
+        <!-- OpenJFX for Modern Dark-Mode GUI (Cross-Platform) -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>21.0.6</version>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>${javafx.platform}</classifier>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics</artifactId>
-            <version>21.0.6</version>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>${javafx.platform}</classifier>
         </dependency>
     </dependencies>
 
