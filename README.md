@@ -87,30 +87,7 @@ conve-ult.bat gui
 # (or double-click conve-ult.bat)
 ```
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│  conve-ult [v1.0.0]        [Single File]  [Batch Convert] [Supported Formats]
-├────────────────────────────────────────────────────────────────────────┤
-│                                                                        │
-│   ┌────────────────────────────────────────────────────────────────┐   │
-│   │               Drag & drop your file here                       │   │
-│   │              or click to browse from system                    │   │
-│   │                                                                │   │
-│   │                     [ Browse File... ]                         │   │
-│   └────────────────────────────────────────────────────────────────┘   │
-│                                                                        │
-│   Conversion Settings                                                  │
-│   ├── Target Format: [ WebP Image (.webp)                  ▼ ]         │
-│   └── Output File:   [/home/user/photos/banner.webp        ] [Browse]  │
-│                                                                        │
-│   Image Optimization Options                                           │
-│   ├── Quality: [ 85%  ─────────●──── ]   [x] Grayscale (B&W)          │
-│   └── Resize:  [ 1920 ] x [ 1080 ] [x] Keep Ratio   Rotate: [ 0° ▼ ]   │
-│                                                                        │
-│   [  Convert File  ]   [====================]  ✔ Converted in 180 ms   │
-│                                                   [ Open Folder ]      │
-└────────────────────────────────────────────────────────────────────────┘
-```
+
 
 ### GUI Highlights:
 1. **Drag & Drop Dropzone**: Drop any supported image or document directly onto the window.
@@ -300,4 +277,8 @@ Please see the comprehensive technical document:
 ---
 
 ## 📄 License
-This project is open-source and free to use. Powered by Apache POI, Apache PDFBox, and OpenJFX.
+
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)** — see the [LICENSE](LICENSE) file for details.
+
+Powered by Apache POI, Apache PDFBox, TwelveMonkeys ImageIO, and OpenJFX.
+
